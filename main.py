@@ -79,7 +79,7 @@ else:
     print ("Couldn't find checkpoint to restore from. Starting over.")
 
 for j in range (2):
-    for i in range (0, 50000, batch_size):
+    for i in range (0, 10000, batch_size):
         feed_dict={
             X: X_train[i:i + batch_size], 
             Y: Y_train[i:i + batch_size],
@@ -95,7 +95,7 @@ for i in range (0, 10000, batch_size):
             X: X_test[i:i+batch_size],
             Y: Y_test[i:i+batch_size]
         })
-        accuracy_summary = tf.scalar_summary("accuracy", accuracy)
+        accuracy_summary = tf.tf.summary.scalar("accuracy", accuracy)
         print (acc)
 
 sess.close()

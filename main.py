@@ -50,8 +50,8 @@ X_train, Y_train, X_test, Y_test = load_data()
 
 batch_size = 25
 
-X = tf.placeholder("float", [batch_size, 32, 32, 3])
-Y = tf.placeholder("float", [batch_size, 10])
+X = tf.placeholder("float", [None, 32, 32, 3])
+Y = tf.placeholder("float", [None, 10])
 learning_rate = tf.placeholder("float", [])
 
 # ResNet Models
@@ -78,24 +78,27 @@ if checkpoint:
 else:
     print ("Couldn't find checkpoint to restore from. Starting over.")
 
-for j in range (2):
-    for i in range (0, 10000, batch_size):
+for j in range (1):
+    for i in range (0, 5000, batch_size):
         feed_dict={
             X: X_train[i:i + batch_size], 
             Y: Y_train[i:i + batch_size],
             learning_rate: 0.001}
         sess.run([train_op], feed_dict=feed_dict)
-        if i % 500 == 0:
-            print ("training on image #%d" % i)
-            saver.save(sess, 'res/out', global_step=i)
+        if i % 1000 == 0:
+            print ("training on image #%d " %( i))
+            saver.save(sess, 'res/out.ckpt', global_step=i)
 
 for i in range (0, 10000, batch_size):
     if i + batch_size < 10000:
-        acc = sess.run([accuracy],feed_dict={
+        acc = sess.run(accuracy,feed_dict={
             X: X_test[i:i+batch_size],
             Y: Y_test[i:i+batch_size]
         })
-        accuracy_summary = tf.tf.summary.scalar("accuracy", accuracy)
-        print (acc)
+        if i%100==0:
+            print (acc)
 
+acc_totle =sess.run(accuracy,feed_dict={
+    X:X_test[:],Y:Y_test[:]})
+print(acc_totle)
 sess.close()

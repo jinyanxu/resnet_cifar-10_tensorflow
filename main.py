@@ -1,11 +1,11 @@
 import models
-import cPickle
+import pickle
 import numpy as np
 import tensorflow as tf
 
 def unpickle(file):
     fo = open(file, 'rb')
-    dict = cPickle.load(fo)
+    dict = pickle.load(fo,encoding='latin1')
     fo.close()
     return dict
 
@@ -36,7 +36,7 @@ def load_data():
     pixel_mean = np.mean(x[0:50000],axis=0)
     x -= pixel_mean
 
-    y = map(one_hot_vec, y)
+    y = list(map(one_hot_vec, y))
     X_train = x[0:50000,:,:,:]
     Y_train = y[0:50000]
     X_test = x[50000:,:,:,:]
@@ -44,14 +44,11 @@ def load_data():
 
     return (X_train, Y_train, X_test, Y_test)
 
-flags = tf.app.flags
-FLAGS = flags.FLAGS
-flags.DEFINE_float('learning_rate', 0.01, 'Learning rate')
-flags.DEFINE_integer('batch_size', 25, 'Batch size')
+
 
 X_train, Y_train, X_test, Y_test = load_data()
 
-batch_size = 128
+batch_size = 25
 
 X = tf.placeholder("float", [batch_size, 32, 32, 3])
 Y = tf.placeholder("float", [batch_size, 10])
@@ -68,7 +65,7 @@ opt = tf.train.MomentumOptimizer(learning_rate, 0.9)
 train_op = opt.minimize(cross_entropy)
 
 sess = tf.Session()
-sess.run(tf.initialize_all_variables())
+sess.run(tf.global_variables_initializer())
 
 correct_prediction = tf.equal(tf.argmax(net, 1), tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
@@ -76,21 +73,21 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 saver = tf.train.Saver()
 checkpoint = tf.train.latest_checkpoint(".")
 if checkpoint:
-    print "Restoring from checkpoint", checkpoint
+    print ("Restoring from checkpoint", checkpoint)
     saver.restore(sess, checkpoint)
 else:
-    print "Couldn't find checkpoint to restore from. Starting over."
+    print ("Couldn't find checkpoint to restore from. Starting over.")
 
-for j in range (10):
+for j in range (2):
     for i in range (0, 50000, batch_size):
         feed_dict={
             X: X_train[i:i + batch_size], 
             Y: Y_train[i:i + batch_size],
             learning_rate: 0.001}
         sess.run([train_op], feed_dict=feed_dict)
-        if i % 512 == 0:
-            print "training on image #%d" % i
-            saver.save(sess, 'progress', global_step=i)
+        if i % 500 == 0:
+            print ("training on image #%d" % i)
+            saver.save(sess, 'res/out', global_step=i)
 
 for i in range (0, 10000, batch_size):
     if i + batch_size < 10000:
@@ -99,6 +96,6 @@ for i in range (0, 10000, batch_size):
             Y: Y_test[i:i+batch_size]
         })
         accuracy_summary = tf.scalar_summary("accuracy", accuracy)
-        print acc
+        print (acc)
 
 sess.close()

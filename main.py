@@ -78,27 +78,30 @@ if checkpoint:
 else:
     print ("Couldn't find checkpoint to restore from. Starting over.")
 
-for j in range (1):
-    for i in range (0, 5000, batch_size):
+for j in range (10):
+    for i in range (0, 50000, batch_size):
         feed_dict={
             X: X_train[i:i + batch_size], 
             Y: Y_train[i:i + batch_size],
             learning_rate: 0.001}
         sess.run([train_op], feed_dict=feed_dict)
+        train_acc = sess.run(accuracy,feed_dict={
+            X: X_train[i:i+batch_size],
+            Y: Y_train[i:i+batch_size]
+        })
         if i % 1000 == 0:
-            print ("training on image #%d " %( i))
+            print ("training on epoch#%d ,batch#%d ,accuracy:%f" %(i,j,train_acc))
             saver.save(sess, 'res/out.ckpt', global_step=i)
-
+totle_acc =0
 for i in range (0, 10000, batch_size):
     if i + batch_size < 10000:
-        acc = sess.run(accuracy,feed_dict={
+        test_acc = sess.run(accuracy,feed_dict={
             X: X_test[i:i+batch_size],
             Y: Y_test[i:i+batch_size]
         })
-        if i%100==0:
-            print (acc)
-
-acc_totle =sess.run(accuracy,feed_dict={
-    X:X_test[:],Y:Y_test[:]})
-print(acc_totle)
+        totle_acc += test_acc
+        if i%1000==0:
+            print ("step%d accuracy:%f"%(i,test_acc))
+totle_acc=totle_acc/400
+print (" totle accuracy:%f"%totle_acc)
 sess.close()

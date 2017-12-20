@@ -83,14 +83,14 @@ for j in range (10):
         feed_dict={
             X: X_train[i:i + batch_size], 
             Y: Y_train[i:i + batch_size],
-            learning_rate: 0.001}
+            learning_rate: 0.0001}
         sess.run([train_op], feed_dict=feed_dict)
         train_acc = sess.run(accuracy,feed_dict={
             X: X_train[i:i+batch_size],
             Y: Y_train[i:i+batch_size]
         })
         if i % 1000 == 0:
-            print ("training on epoch#%d ,batch#%d ,accuracy:%f" %(i,j,train_acc))
+            print ("training on epoch#%d ,batch#%d ,accuracy:%f" %(j,i,train_acc))
             saver.save(sess, 'res/out.ckpt', global_step=i)
 totle_acc =0
 for i in range (0, 10000, batch_size):
